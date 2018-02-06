@@ -12,20 +12,9 @@ public class PlayerController : MonoBehaviour {
     [Range(0.0f, 1000f)]
     public float sideSpeed = 100f;
     [Range(0.0f, 1f)]
-    public float slowTimeBy = 0.01f;
+    public float slowTimeTo = 0.25f;
 
     public bool jumping = false;
-
-    public iTween.EaseType easetype;
-    Hashtable jump = new Hashtable();
-    private void Awake()
-    {
-        jump.Add("y", 6);
-        jump.Add("time", 1);
-        jump.Add("oncomplete", "AfterJump");
-        jump.Add("onupdate", "SlowTime");
-        jump.Add("easetype", easetype);
-    }
 
     private void Start()
     {
@@ -39,8 +28,8 @@ public class PlayerController : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.UpArrow))
         {
             jumping = true;
-            iTween.MoveAdd(gameObject, jump);
-            Physics.gravity = new Vector3(0, 0f, 0);
+            Jump();
+            GetComponent<Rigidbody>().useGravity = false;
         }
 
         // Move left when not jumping
@@ -66,6 +55,16 @@ public class PlayerController : MonoBehaviour {
         }
     }
 
+    void Jump () {
+        //SlowTime();
+        while (transform.position.y < -5f) {
+            Vector3 newPos = transform.position;
+            newPos.y = Mathf.Lerp(newPos.y, -5.25f, Time.deltaTime);
+            transform.position = newPos;
+        }
+        AfterJump();
+    }
+
     // Rotates floor in desired direcion smoothly
     IEnumerator RotateFloor(Vector3 byAngles, float inTime)
     {
@@ -80,13 +79,13 @@ public class PlayerController : MonoBehaviour {
 
     void SlowTime ()
     {
-        Time.timeScale -= slowTimeBy * Time.deltaTime;
+        Time.timeScale = slowTimeTo;
         print(Time.timeScale);
     }
 
     void AfterJump ()
     {
-        Physics.gravity = new Vector3(0, -30f, 0);
+        GetComponent<Rigidbody>().useGravity = true;
         Time.timeScale = 1f;
         jumping = false;
     }
