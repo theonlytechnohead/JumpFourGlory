@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using UnityEngine;
+using UnityEngine.PostProcessing;
 
 public class PlayerController : MonoBehaviour {
 
@@ -22,13 +23,11 @@ public class PlayerController : MonoBehaviour {
     private Rigidbody rb;
     public bool jumping = false;
 
+    public Quaternion floorRotation;
+
     void Awake () {
         rb = GetComponent<Rigidbody>();
-    }
-
-    private void Start()
-    {
-        
+        floorRotation = Quaternion.Euler(0f, 0f, 0f);
     }
 
     void Update () {
@@ -42,6 +41,7 @@ public class PlayerController : MonoBehaviour {
         } else if (rb.velocity.y == 0) {
             jumping = false;
         }
+        print (rb.velocity.y);
         // Jump when up is pressed
         if (Input.GetKeyDown(KeyCode.UpArrow) && jumping == false)
         {
@@ -57,6 +57,8 @@ public class PlayerController : MonoBehaviour {
         // Rotate floor left when jumping
         if (Input.GetKeyDown(KeyCode.LeftArrow) && jumping)
         {
+            floorRotation = Quaternion.Euler(0f, 0f, floorRotation.eulerAngles.z - 90f);
+            floorHolder.transform.rotation = floorRotation;
             //StartCoroutine(RotateFloor(Vector3.forward * 90, 0.4f));
         }
 
@@ -68,8 +70,17 @@ public class PlayerController : MonoBehaviour {
         // Rotate floor right when jumping
         if (Input.GetKeyDown(KeyCode.RightArrow) && jumping)
         {
+            floorRotation = Quaternion.Euler(0f, 0f, floorRotation.eulerAngles.z + 90f);
+            floorHolder.transform.rotation = floorRotation;
             //StartCoroutine(RotateFloor(Vector3.forward * -90, 0.4f));
         }
+
+        float jumpTransition = Mathf.InverseLerp(-14f, -5f, transform.localPosition.y);
+        PostProcessingProfile postProfile = mainCamera.GetComponent<PostProcessingBehaviour>().profile;
+        float newHue = Mathf.Lerp(0, 180, jumpTransition);
+        var grading = postProfile.colorGrading.settings;
+        grading.basic.hueShift = newHue;
+        postProfile.colorGrading.settings = grading;
     }
 
     // Rotates floor in desired direcion smoothly
