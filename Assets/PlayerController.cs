@@ -14,22 +14,36 @@ public class PlayerController : MonoBehaviour {
     [Range(0.0f, 1f)]
     public float slowTimeTo = 0.25f;
 
+    [Range(1f, 50f)]
+    public float jumpVelocity = 25f;
+    public float fallMultiplier = 2.5f;
+    public float lowJumpMultiplier = 2f;
+
+    private Rigidbody rb;
     public bool jumping = false;
+
+    void Awake () {
+        rb = GetComponent<Rigidbody>();
+    }
 
     private void Start()
     {
-        Physics.gravity = new Vector3(0, -30f, 0);
+        
     }
 
     void Update () {
         // Makes main camera look at the player ALWAYS!!!
         mainCamera.transform.LookAt(transform);
+
+        if (rb.velocity.y < 0) {
+            rb.velocity += Vector3.up * Physics.gravity.y * (fallMultiplier - 1) * Time.deltaTime;
+        } else if (rb.velocity.y > 0 && !Input.GetKey(KeyCode.UpArrow)) {
+            rb.velocity += Vector3.up * Physics.gravity.y * (lowJumpMultiplier - 1) * Time.deltaTime;
+        }
         // Jump when up is pressed
         if (Input.GetKeyDown(KeyCode.UpArrow))
         {
-            jumping = true;
-            Jump();
-            GetComponent<Rigidbody>().useGravity = false;
+            rb.velocity = Vector3.up * jumpVelocity;
         }
 
         // Move left when not jumping
@@ -40,7 +54,7 @@ public class PlayerController : MonoBehaviour {
         // Rotate floor left when jumping
         if (Input.GetKeyDown(KeyCode.LeftArrow) && jumping)
         {
-            StartCoroutine(RotateFloor(Vector3.forward * 90, 0.4f));
+            //StartCoroutine(RotateFloor(Vector3.forward * 90, 0.4f));
         }
 
         // Move right when not jumping
@@ -51,18 +65,8 @@ public class PlayerController : MonoBehaviour {
         // Rotate floor right when jumping
         if (Input.GetKeyDown(KeyCode.RightArrow) && jumping)
         {
-            StartCoroutine(RotateFloor(Vector3.forward * -90, 0.4f));
+            //StartCoroutine(RotateFloor(Vector3.forward * -90, 0.4f));
         }
-    }
-
-    void Jump () {
-        //SlowTime();
-        while (transform.position.y < -5f) {
-            Vector3 newPos = transform.position;
-            newPos.y = Mathf.Lerp(newPos.y, -5.25f, Time.deltaTime);
-            transform.position = newPos;
-        }
-        AfterJump();
     }
 
     // Rotates floor in desired direcion smoothly
@@ -80,14 +84,11 @@ public class PlayerController : MonoBehaviour {
     void SlowTime ()
     {
         Time.timeScale = slowTimeTo;
-        print(Time.timeScale);
     }
 
     void AfterJump ()
     {
-        GetComponent<Rigidbody>().useGravity = true;
         Time.timeScale = 1f;
-        jumping = false;
     }
 
     private void OnCollisionEnter (Collision collision)
