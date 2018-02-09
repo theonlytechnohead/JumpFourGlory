@@ -39,10 +39,13 @@ public class PlayerController : MonoBehaviour {
             rb.velocity += Vector3.up * Physics.gravity.y * (fallMultiplier - 1) * Time.deltaTime;
         } else if (rb.velocity.y > 0 && !Input.GetKey(KeyCode.UpArrow)) {
             rb.velocity += Vector3.up * Physics.gravity.y * (lowJumpMultiplier - 1) * Time.deltaTime;
+        } else if (rb.velocity.y == 0) {
+            jumping = false;
         }
         // Jump when up is pressed
-        if (Input.GetKeyDown(KeyCode.UpArrow))
+        if (Input.GetKeyDown(KeyCode.UpArrow) && jumping == false)
         {
+            jumping = true;
             rb.velocity = Vector3.up * jumpVelocity;
         }
 
