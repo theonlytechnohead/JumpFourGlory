@@ -25,6 +25,11 @@ public class PlayerController : MonoBehaviour {
 
     public Quaternion floorRotation;
 
+
+    public PostProcessingProfile PPP;
+    public PostProcessingProfile PPPLow;
+    private bool lowSettings = false;
+
     void Awake () {
         rb = GetComponent<Rigidbody>();
         floorRotation = Quaternion.Euler(0f, 0f, 0f);
@@ -38,10 +43,10 @@ public class PlayerController : MonoBehaviour {
             rb.velocity += Vector3.up * Physics.gravity.y * (fallMultiplier - 1) * Time.deltaTime;
         } else if (rb.velocity.y > 0 && !Input.GetKey(KeyCode.UpArrow)) {
             rb.velocity += Vector3.up * Physics.gravity.y * (lowJumpMultiplier - 1) * Time.deltaTime;
-        } else if (rb.velocity.y == 0) {
+        }
+        if (transform.position.y < -13.5f) {
             jumping = false;
         }
-        print (rb.velocity.y);
         // Jump when up is pressed
         if (Input.GetKeyDown(KeyCode.UpArrow) && jumping == false)
         {
@@ -58,7 +63,6 @@ public class PlayerController : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.LeftArrow) && jumping)
         {
             floorRotation = Quaternion.Euler(0f, 0f, floorRotation.eulerAngles.z - 90f);
-            floorHolder.transform.rotation = floorRotation;
             //StartCoroutine(RotateFloor(Vector3.forward * 90, 0.4f));
         }
 
@@ -71,8 +75,18 @@ public class PlayerController : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.RightArrow) && jumping)
         {
             floorRotation = Quaternion.Euler(0f, 0f, floorRotation.eulerAngles.z + 90f);
-            floorHolder.transform.rotation = floorRotation;
             //StartCoroutine(RotateFloor(Vector3.forward * -90, 0.4f));
+        }
+
+        floorHolder.transform.rotation = Quaternion.Lerp(floorHolder.transform.rotation, floorRotation, 10f * Time.deltaTime);
+
+        if (Input.GetKeyDown(KeyCode.G)) {
+            lowSettings = !lowSettings;
+        }
+        if (lowSettings) {
+            mainCamera.GetComponent<PostProcessingBehaviour>().profile = PPPLow;
+        } else {
+            mainCamera.GetComponent<PostProcessingBehaviour>().profile = PPP;
         }
 
         float jumpTransition = Mathf.InverseLerp(-14f, -5f, transform.localPosition.y);
@@ -81,18 +95,7 @@ public class PlayerController : MonoBehaviour {
         var grading = postProfile.colorGrading.settings;
         grading.basic.hueShift = newHue;
         postProfile.colorGrading.settings = grading;
-    }
 
-    // Rotates floor in desired direcion smoothly
-    IEnumerator RotateFloor(Vector3 byAngles, float inTime)
-    {
-        var fromAngle = floorHolder.transform.rotation;
-        var toAngle = Quaternion.Euler(floorHolder.transform.eulerAngles + byAngles);
-        for (var t = 0f; t < 1f; t += Time.deltaTime / inTime)
-        {
-            floorHolder.transform.rotation = Quaternion.Slerp(fromAngle, toAngle, t);
-            yield return null;
-        }
     }
 
     void SlowTime ()
