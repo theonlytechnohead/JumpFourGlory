@@ -12,8 +12,6 @@ public class PlayerController : MonoBehaviour {
     public float forwardSpeed = 10f;
     [Range(0.0f, 1000f)]
     public float sideSpeed = 100f;
-    [Range(0.0f, 1f)]
-    public float slowTimeTo = 0.25f;
 
     [Range(1f, 50f)]
     public float jumpVelocity = 25f;
@@ -21,9 +19,9 @@ public class PlayerController : MonoBehaviour {
     public float lowJumpMultiplier = 2f;
 
     private Rigidbody rb;
-    public bool jumping = false;
+    private bool jumping = false;
 
-    public Quaternion floorRotation;
+    private Quaternion floorRotation;
 
 
     public PostProcessingProfile PPP;
@@ -44,7 +42,7 @@ public class PlayerController : MonoBehaviour {
         } else if (rb.velocity.y > 0 && !Input.GetKey(KeyCode.UpArrow)) {
             rb.velocity += Vector3.up * Physics.gravity.y * (lowJumpMultiplier - 1) * Time.deltaTime;
         }
-        if (transform.position.y < -13.5f) {
+        if (transform.position.y < -13.75f) {
             jumping = false;
         }
         // Jump when up is pressed
@@ -96,22 +94,6 @@ public class PlayerController : MonoBehaviour {
         grading.basic.hueShift = newHue;
         postProfile.colorGrading.settings = grading;
 
-    }
-
-    void SlowTime ()
-    {
-        Time.timeScale = slowTimeTo;
-    }
-
-    void AfterJump ()
-    {
-        Time.timeScale = 1f;
-    }
-
-    private void OnCollisionEnter (Collision collision)
-    {
-        //print("Hit " + collision.gameObject.name);
-        //jumping = false;
     }
 
     // Move forward
