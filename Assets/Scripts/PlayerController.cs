@@ -111,5 +111,6 @@ public class PlayerController : MonoBehaviour {
         Vector3 newPos = mainCamera.transform.localPosition;
         newPos.z = Mathf.Lerp(-12f, -8f, jumpTransition);
         mainCamera.transform.localPosition = newPos;
+        Time.timeScale = Mathf.Lerp(1f, 0.25f, jumpTransition);
 	}
 }
