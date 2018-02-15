@@ -20,6 +20,7 @@ public class PlayerController : MonoBehaviour {
 
     private Rigidbody rb;
     private bool jumping = false;
+    private float jumpTransition;
 
     private Quaternion floorRotation;
 
@@ -87,18 +88,24 @@ public class PlayerController : MonoBehaviour {
             mainCamera.GetComponent<PostProcessingBehaviour>().profile = PPP;
         }
 
-        float jumpTransition = Mathf.InverseLerp(-14f, -5f, transform.localPosition.y);
+        jumpTransition = Mathf.InverseLerp(-14f, 0f, transform.localPosition.y);
         PostProcessingProfile postProfile = mainCamera.GetComponent<PostProcessingBehaviour>().profile;
         float newHue = Mathf.Lerp(0, 180, jumpTransition);
         var grading = postProfile.colorGrading.settings;
         grading.basic.hueShift = newHue;
         postProfile.colorGrading.settings = grading;
-
+        
     }
 
     // Move forward
     void FixedUpdate () {
         transform.Translate(0, 0, forwardSpeed * Time.deltaTime);
         cameraHolder.transform.Translate(0, 0, forwardSpeed * Time.deltaTime);
+        
+        mainCamera.GetComponent<Camera>().fieldOfView = Mathf.Lerp(55f, 90f, jumpTransition);
+
+        Vector3 newPos = mainCamera.transform.localPosition;
+        newPos.z = Mathf.Lerp(-12f, -8f, jumpTransition);
+        mainCamera.transform.localPosition = newPos;
 	}
 }
