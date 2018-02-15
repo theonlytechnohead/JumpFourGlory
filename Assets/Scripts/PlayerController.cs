@@ -94,15 +94,19 @@ public class PlayerController : MonoBehaviour {
         var grading = postProfile.colorGrading.settings;
         grading.basic.hueShift = newHue;
         postProfile.colorGrading.settings = grading;
-        
+
+        var dof = postProfile.depthOfField.settings;
+        dof.focusDistance = Mathf.Lerp(12f, 8f, jumpTransition);
+        dof.focalLength = Mathf.Lerp(75, 35, jumpTransition);
+        postProfile.depthOfField.settings = dof;
+
+        mainCamera.GetComponent<Camera>().fieldOfView = Mathf.Lerp(55f, 90f, jumpTransition);
     }
 
     // Move forward
     void FixedUpdate () {
         transform.Translate(0, 0, forwardSpeed * Time.deltaTime);
         cameraHolder.transform.Translate(0, 0, forwardSpeed * Time.deltaTime);
-        
-        mainCamera.GetComponent<Camera>().fieldOfView = Mathf.Lerp(55f, 90f, jumpTransition);
 
         Vector3 newPos = mainCamera.transform.localPosition;
         newPos.z = Mathf.Lerp(-12f, -8f, jumpTransition);
