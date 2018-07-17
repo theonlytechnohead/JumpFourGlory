@@ -17,6 +17,7 @@ public class NewPlayerController : MonoBehaviour {
 	public float jumpVelocity = 25f;
 
 	private bool jumping = false;
+	private bool falling = true;
 	private float jumpTransition;
 	float jumpDistance;
 	float timeScale;
@@ -38,24 +39,28 @@ public class NewPlayerController : MonoBehaviour {
 			mainCamera.transform.localRotation = Quaternion.Slerp(mainCamera.transform.localRotation, Quaternion.Euler(0f, 0f, 0f), 2f * Time.deltaTime);
 			if (Input.GetKeyDown(KeyCode.UpArrow)) {
 				worldRotation = Quaternion.Euler(0f, 0f, worldRotation.eulerAngles.z + 180f);
-				jumping = false;
+				StartCoroutine(disableDelay());
 			}
 			if (Input.GetKeyDown(KeyCode.RightArrow)) {
 				worldRotation = Quaternion.Euler(0f, 0f, worldRotation.eulerAngles.z + 90f);
-				jumping = false;
+				StartCoroutine(disableDelay());
 			}
 			if (Input.GetKeyDown(KeyCode.DownArrow)) {
-				jumping = false;
+				StartCoroutine(disableDelay());
 			}
 			if (Input.GetKeyDown(KeyCode.LeftArrow)) {
 				worldRotation = Quaternion.Euler(0f, 0f, worldRotation.eulerAngles.z - 90f);
-				jumping = false;
+				StartCoroutine(disableDelay());
 			}
 		} else {
 			transform.position = Vector3.Lerp(transform.position, fallLocationGameObject.transform.position, 2f * Time.deltaTime);
 			mainCamera.transform.localRotation = Quaternion.Slerp(mainCamera.transform.localRotation, Quaternion.Euler(30f, 0f, 0f), 2f * Time.deltaTime);
+
+		}
+		if (falling) {
 			if (Input.GetKeyDown(KeyCode.UpArrow)) {
 				jumping = true;
+				falling = false;
 			}
 			if (Input.GetKey(KeyCode.RightArrow)) {
 				transform.Translate(Vector3.right * sideSpeed * Time.deltaTime, Space.Self);
@@ -88,24 +93,31 @@ public class NewPlayerController : MonoBehaviour {
 		var grading = postProfile.colorGrading.settings;
 		grading.basic.hueShift = newHue;
 		postProfile.colorGrading.settings = grading;
-		// DoF stuff for coolio post proccessing stuff
+		// DoF stuff for coolio post proccessing stuff and to cope with camera push in
 		var dof = postProfile.depthOfField.settings;
-		dof.focusDistance = Mathf.Lerp(12f, 6f, jumpTransition);
-		dof.focalLength = Mathf.Lerp(75, 35, jumpTransition);
+		dof.focusDistance = Mathf.Lerp(12f, 8f, jumpTransition);
+		dof.focalLength = Mathf.Lerp(75, 10, jumpTransition);
 		postProfile.depthOfField.settings = dof;
-		// FoV application
+		// FoV lerpy-derp
 		mainCamera.GetComponent<Camera>().fieldOfView = Mathf.Lerp(55f, 120f, jumpTransition);
 	}
 
-	// Move forward
 	void FixedUpdate() {
+		// Move stuff forward - progression!
 		transform.Translate(0, 0, forwardSpeed * timeScale * Time.deltaTime);
 		cameraHolder.transform.Translate(0, 0, forwardSpeed * timeScale * Time.deltaTime);
 		fallHolder.transform.Translate(0, 0, forwardSpeed * timeScale * Time.deltaTime);
-
+		// Camera push in when jumping - compensate for crazy FoV
 		Vector3 newPos = mainCamera.transform.localPosition;
-		newPos.z = Mathf.Lerp(-12f, -6f, jumpTransition);
+		newPos.z = Mathf.Lerp(-12f, -8f, jumpTransition);
 		mainCamera.transform.localPosition = newPos;
 		//Time.timeScale = Mathf.Lerp(1f, 0.25f, jumpTransition);
+	}
+
+	IEnumerator disableDelay() {
+		jumping = false;
+		yield return new WaitForSeconds(0.5f);
+		falling = true;
+		StopAllCoroutines();
 	}
 }
