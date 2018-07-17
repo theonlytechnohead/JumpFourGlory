@@ -8,7 +8,6 @@ public class NewPlayerController : MonoBehaviour {
 	public GameObject mainCamera;
 	public GameObject fallHolder;
 	public GameObject fallLocationGameObject;
-	float jumpDistance;
 
 	[Range(0.0f, 100f)]
 	public float forwardSpeed = 10f;
@@ -19,6 +18,8 @@ public class NewPlayerController : MonoBehaviour {
 
 	private bool jumping = false;
 	private float jumpTransition;
+	float jumpDistance;
+	float timeScale;
 
 	private Quaternion worldRotation;
 
@@ -80,6 +81,7 @@ public class NewPlayerController : MonoBehaviour {
 
 		jumpDistance = Vector3.Distance(transform.position, fallHolder.transform.position);
 		jumpTransition = Mathf.InverseLerp(14f, 0f, jumpDistance);
+		timeScale = Mathf.InverseLerp(0f, 14f, jumpDistance);
 		// Post processing coolio stuffs
 		PostProcessingProfile postProfile = mainCamera.GetComponent<PostProcessingBehaviour>().profile;
 		float newHue = Mathf.Lerp(0, 270, jumpTransition);
@@ -97,9 +99,9 @@ public class NewPlayerController : MonoBehaviour {
 
 	// Move forward
 	void FixedUpdate() {
-		transform.Translate(0, 0, forwardSpeed * Time.deltaTime);
-		cameraHolder.transform.Translate(0, 0, forwardSpeed * Time.deltaTime);
-		fallHolder.transform.Translate(0, 0, forwardSpeed * Time.deltaTime);
+		transform.Translate(0, 0, forwardSpeed * timeScale * Time.deltaTime);
+		cameraHolder.transform.Translate(0, 0, forwardSpeed * timeScale * Time.deltaTime);
+		fallHolder.transform.Translate(0, 0, forwardSpeed * timeScale * Time.deltaTime);
 
 		Vector3 newPos = mainCamera.transform.localPosition;
 		newPos.z = Mathf.Lerp(-12f, -6f, jumpTransition);
