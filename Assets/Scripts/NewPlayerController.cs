@@ -7,6 +7,7 @@ public class NewPlayerController : MonoBehaviour {
 
 	public GameObject cameraHolder;
 	public GameObject mainCamera;
+	public GameObject UICamera;
 	public GameObject fallHolder;
 	public GameObject fallLocationGameObject;
 
@@ -22,6 +23,8 @@ public class NewPlayerController : MonoBehaviour {
 	private float jumpTransition;
 	float jumpDistance;
 	float timeScale;
+
+	public bool destroyed = false;
 
 	private Quaternion worldRotation;
 
@@ -42,9 +45,10 @@ public class NewPlayerController : MonoBehaviour {
 			SceneManager.LoadScene(scene.name);
 		}
 		fallHolder.transform.localRotation = worldRotation;
-		if (jumping) {
+		if (jumping && !destroyed) {
 			transform.position = Vector3.Lerp(transform.position, new Vector3(0f, 0f, transform.position.z), 2f * Time.deltaTime);
 			mainCamera.transform.localRotation = Quaternion.Slerp(mainCamera.transform.localRotation, Quaternion.Euler(0f, 0f, 0f), 2f * Time.deltaTime);
+			UICamera.transform.localRotation = Quaternion.Slerp(UICamera.transform.localRotation, Quaternion.Euler(0f, 0f, 0f), 2f * Time.deltaTime);
 			if (Input.GetKeyDown(KeyCode.UpArrow)) {
 				worldRotation = Quaternion.Euler(0f, 0f, worldRotation.eulerAngles.z + 180f);
 				StartCoroutine(disableDelay());
@@ -63,9 +67,10 @@ public class NewPlayerController : MonoBehaviour {
 		} else {
 			transform.position = Vector3.Lerp(transform.position, fallLocationGameObject.transform.position, 2f * Time.deltaTime);
 			mainCamera.transform.localRotation = Quaternion.Slerp(mainCamera.transform.localRotation, Quaternion.Euler(30f, 0f, 0f), 2f * Time.deltaTime);
+			UICamera.transform.localRotation = Quaternion.Slerp(UICamera.transform.localRotation, Quaternion.Euler(30f, 0f, 0f), 2f * Time.deltaTime);
 
 		}
-		if (falling) {
+		if (falling && !destroyed) {
 			if (Input.GetKeyDown(KeyCode.UpArrow)) {
 				jumping = true;
 				falling = false;
@@ -106,20 +111,26 @@ public class NewPlayerController : MonoBehaviour {
 		dof.focusDistance = Mathf.Lerp(12f, 8f, jumpTransition);
 		dof.focalLength = Mathf.Lerp(75, 10, jumpTransition);
 		postProfile.depthOfField.settings = dof;
+
+		var bloom = postProfile.bloom.settings;
+		bloom.bloom.threshold = Mathf.Lerp(bloom.bloom.threshold, 1.6f, Time.deltaTime);
+		postProfile.bloom.settings = bloom;
 		// FoV lerpy-derp
 		mainCamera.GetComponent<Camera>().fieldOfView = Mathf.Lerp(55f, 120f, jumpTransition);
+		UICamera.GetComponent<Camera>().fieldOfView = Mathf.Lerp(55f, 120f, jumpTransition);
 	}
 
 	void FixedUpdate() {
-		// Move stuff forward - progression!
-		transform.Translate(0, 0, forwardSpeed * timeScale * Time.deltaTime);
-		cameraHolder.transform.Translate(0, 0, forwardSpeed * timeScale * Time.deltaTime);
-		fallHolder.transform.Translate(0, 0, forwardSpeed * timeScale * Time.deltaTime);
-		// Camera push in when jumping - compensate for crazy FoV
-		Vector3 newPos = mainCamera.transform.localPosition;
-		newPos.z = Mathf.Lerp(-12f, -8f, jumpTransition);
-		mainCamera.transform.localPosition = newPos;
-		//Time.timeScale = Mathf.Lerp(1f, 0.25f, jumpTransition);
+		if (!destroyed) { // Move stuff forward - progression!
+			transform.Translate(0, 0, forwardSpeed * timeScale * Time.deltaTime);
+			cameraHolder.transform.Translate(0, 0, forwardSpeed * timeScale * Time.deltaTime);
+			fallHolder.transform.Translate(0, 0, forwardSpeed * timeScale * Time.deltaTime);
+			// Camera push in when jumping - compensate for crazy FoV
+			Vector3 newPos = mainCamera.transform.localPosition;
+			newPos.z = Mathf.Lerp(-12f, -8f, jumpTransition);
+			mainCamera.transform.localPosition = newPos;
+			UICamera.transform.localPosition = newPos;
+		}
 	}
 
 	IEnumerator disableDelay() {
@@ -127,5 +138,12 @@ public class NewPlayerController : MonoBehaviour {
 		yield return new WaitForSeconds(0.5f);
 		falling = true;
 		StopAllCoroutines();
+	}
+
+	public void bloomDestroy() {
+		PostProcessingProfile postProfile = mainCamera.GetComponent<PostProcessingBehaviour>().profile;
+		var bloom = postProfile.bloom.settings;
+		bloom.bloom.threshold = 0.5f;
+		postProfile.bloom.settings = bloom;
 	}
 }

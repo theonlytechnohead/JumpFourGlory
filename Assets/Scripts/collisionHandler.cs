@@ -11,7 +11,9 @@ public class collisionHandler : MonoBehaviour {
 		if (other.tag == "Player") {
 			Instantiate(explosion, other.transform.position, Quaternion.identity);
 			Invoke("reset", 10f);
-			Destroy(other.gameObject);
+			other.gameObject.GetComponent<NewPlayerController>().bloomDestroy();
+			Destroy(other.gameObject.GetComponent<MeshRenderer>());
+			other.gameObject.GetComponent<NewPlayerController>().destroyed = true;
 		}
 	}
 
