@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.PostProcessing;
+using UnityEngine.SceneManagement;
 
 public class NewPlayerController : MonoBehaviour {
 
@@ -33,6 +34,13 @@ public class NewPlayerController : MonoBehaviour {
 	}
 
 	void Update() {
+		if (Input.GetKeyDown(KeyCode.Escape)) {
+			Application.Quit();
+		}
+		if (Input.GetKeyDown(KeyCode.R)) {
+			Scene scene = SceneManager.GetActiveScene();
+			SceneManager.LoadScene(scene.name);
+		}
 		fallHolder.transform.localRotation = worldRotation;
 		if (jumping) {
 			transform.position = Vector3.Lerp(transform.position, new Vector3(0f, 0f, transform.position.z), 2f * Time.deltaTime);
