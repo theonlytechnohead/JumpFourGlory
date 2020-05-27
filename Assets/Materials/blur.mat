@@ -4,8 +4,9 @@
 Material:
   serializedVersion: 6
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_Name: blur
   m_Shader: {fileID: 4800000, guid: 54d0ad70cd0c44037ad52d9697449988, type: 3}
   m_ShaderKeywords: _ALPHAPREMULTIPLY_ON
@@ -82,4 +83,4 @@ Material:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _ColorMask: {r: 1, g: 1, b: 1, a: 0.2}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _TintColor: {r: 0, g: 0, b: 0, a: 0.49019608}
+    - _TintColor: {r: 0, g: 0, b: 0, a: 0.6156863}
